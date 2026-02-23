@@ -82,4 +82,4 @@ jobs:
             "${DOCKER_LABELS[@]}" \
             --output "type=image,push=true" \
             --build-arg AUTO_UPGRADE=${AUTO_UPGRADE} \
-            --platform linux/arm64/v8,linux/amd64,linux/386,linux/ppc64le,linux/s390x .
+            --platform linux/amd64,linux/386,linux/ppc64le,linux/s390x .
