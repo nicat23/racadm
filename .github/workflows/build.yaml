@@ -1,31 +1,40 @@
-name: Build and Push Dockerfile
+name: Build and Push racadm Image
 
 on:
-  push:
-    branches: [ test ]
-
+  workflow_dispatch:
+    inputs:
+      image_tag:
+        description: "Tag for racadm image"
+        required: true
+        default: "latest"
+        type: string
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
-
     steps:
-      - uses: actions/checkout@v4
-
+      - name: Checkout repository
+        uses: actions/checkout@v4
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
-
       - name: Login to DockerHub
         uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
-
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
       - name: Build and push image
         uses: docker/build-push-action@v5
         with:
           context: .
           file: ./Dockerfile
           push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/myapp:latest
+          tags: |
+            nicat23/racadm:${{ github.event.inputs.image_tag }}
+            ghcr.io/${{ github.repository_owner }}/racadm:${{ github.event.inputs.image_tag }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
