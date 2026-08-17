@@ -1,9 +1,15 @@
 # --- Stage 1: Build racadm environment ---
 ARG VER=3.23.5 \
   DSU=DSU_26.02.09 \
-	OS=RHEL10_64 \
-	SEMVER=11.4.0.0-1435.el10.x86_64
+  OS=RHEL10_64 \
+  SEMVER=11.4.0.0-1435.el10.x86_64
+
 FROM alpine:${VER} AS emc
+
+ARG DSU=DSU_26.02.09
+ARG OS=RHEL10_64
+ARG SEMVER=11.4.0.0-1435.el10.x86_64
+
 RUN set -eux; \
     apk add --no-cache --virtual .build-deps curl rpm gcompat libc6-compat libstdc++ bash coreutils; \
     TMPDIR=/tmp/rpms; mkdir -p "$TMPDIR"; cd "$TMPDIR"; \
