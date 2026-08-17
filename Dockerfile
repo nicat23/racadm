@@ -1,8 +1,9 @@
 # --- Stage 1: Build racadm environment ---
-FROM alpine:3.23 AS emc
-ARG DSU=DSU_26.02.09 \
+ARG VER=3.2.3 \
+  DSU=DSU_26.02.09 \
 	OS=RHEL10_64 \
 	SEMVER=11.4.0.0-1435.el10.x86_64
+FROM alpine:${VER} AS emc
 RUN set -eux; \
     apk add --no-cache --virtual .build-deps curl rpm gcompat libc6-compat libstdc++ bash coreutils; \
     TMPDIR=/tmp/rpms; mkdir -p "$TMPDIR"; cd "$TMPDIR"; \
@@ -20,7 +21,7 @@ RUN set -eux; \
     apk del --purge .build-deps || true
 
 # --- Stage 2: Minimal runtime image ---
-FROM alpine:3.23
+FROM alpine:${VER}
 COPY --from=emc /opt/dell /opt/dell
 #COPY --from=emc /opt/dell/srvadmin/bin/idracadm7 /opt/dell/srvadmin/bin/idracadm7
 
