@@ -1,4 +1,5 @@
 /script/
 /.github/
-.gitignore
-LICENSE
+/.vscode/
+/.gitignore
+/LICENSE
