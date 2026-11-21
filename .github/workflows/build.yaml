@@ -5,12 +5,17 @@ permissions:
   packages: write
 
 on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'Dockerfile'
+      - '.github/workflows/build.yaml'
   workflow_dispatch:
     inputs:
       image_tag:
-        description: "Tag for racadm image"
-        required: true
-        default: "latest"
+        description: "Tag for racadm image (leave empty for automatic tagging)"
+        required: false
         type: string
 
 jobs:
@@ -19,27 +24,56 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Generate image metadata
+        id: meta
+        run: |
+          if [ -n "${{ github.event.inputs.image_tag }}" ]; then
+            # Manual workflow_dispatch with custom tag
+            TAG="${{ github.event.inputs.image_tag }}"
+          else
+            # Automatic push or dispatch without tag - use git info
+            SHORT_SHA=$(git rev-parse --short HEAD)
+            if [ "${{ github.ref }}" = "refs/heads/main" ]; then
+              TAG="latest-${SHORT_SHA}"
+              echo "TAGS<<EOF" >> $GITHUB_OUTPUT
+              echo "nicat23/racadm:latest" >> $GITHUB_OUTPUT
+              echo "nicat23/racadm:latest-${SHORT_SHA}" >> $GITHUB_OUTPUT
+              echo "ghcr.io/${{ github.repository_owner }}/racadm:latest" >> $GITHUB_OUTPUT
+              echo "ghcr.io/${{ github.repository_owner }}/racadm:latest-${SHORT_SHA}" >> $GITHUB_OUTPUT
+              echo "EOF" >> $GITHUB_OUTPUT
+              exit 0
+            fi
+          fi
+          echo "TAGS<<EOF" >> $GITHUB_OUTPUT
+          echo "nicat23/racadm:${TAG}" >> $GITHUB_OUTPUT
+          echo "ghcr.io/${{ github.repository_owner }}/racadm:${TAG}" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
+
       - name: Login to DockerHub
         uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
+
       - name: Login to GHCR
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Build and push image
         uses: docker/build-push-action@v5
         with:
           context: .
           file: ./Dockerfile
           push: true
-          tags: |
-            nicat23/racadm:${{ github.event.inputs.image_tag }}
-            ghcr.io/${{ github.repository_owner }}/racadm:${{ github.event.inputs.image_tag }}
+          tags: ${{ steps.meta.outputs.TAGS }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
