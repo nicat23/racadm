@@ -35,23 +35,22 @@ The workflow is triggered in two ways:
 ### Automatic Trigger
 - **When**: Changes pushed to `main` branch
 - **What changes**: Only when `Dockerfile` or `.github/workflows/build.yaml` changes
-- **Tags applied**: 
+- **Tags applied**:
   - `nicat23/racadm:latest`
-  - `nicat23/racadm:latest-{short-sha}`
-  - GHCR equivalents
+  - `ghcr.io/{username}/racadm:latest`
 
 ### Manual Trigger (Workflow Dispatch)
 - **How**: Go to **Actions → Build and Push racadm Image → Run workflow**
-- **Options**:
-  - Leave `image_tag` empty for automatic tagging
-  - Or provide a custom tag (e.g., `v1.0.0`, `staging`, etc.)
+- **Tags applied**: The same `latest` tags as the automatic trigger
 
 ## Published Images
 
 After setup, your images will be available at:
 
-- **DockerHub**: `nicat23/racadm:latest`, `nicat23/racadm:latest-{sha}`, or custom tags
-- **GHCR**: `ghcr.io/{username}/racadm:latest`, etc.
+- **DockerHub**: `nicat23/racadm:latest`
+- **GHCR**: `ghcr.io/{username}/racadm:latest`
+
+Previously published tags are not removed automatically.
 
 ## Example Usage
 
@@ -59,12 +58,6 @@ Pull the automatically built image:
 
 ```bash
 docker pull nicat23/racadm:latest
-```
-
-Or with a specific commit:
-
-```bash
-docker pull nicat23/racadm:latest-abc1234
 ```
 
 ## Monitoring Builds
@@ -109,11 +102,7 @@ docker pull nicat23/racadm:latest-abc1234
    - Regenerate tokens periodically
    - Delete old tokens when no longer needed
 
-2. **Tag releases properly**:
-   - Use semantic versioning (e.g., `v1.0.0`, `v1.0.1`)
-   - Use the manual dispatch with custom tag for releases
-
-3. **Monitor build logs**:
+2. **Monitor build logs**:
    - Review logs for any warnings or deprecated dependencies
    - Fix issues early before they become problems
 
