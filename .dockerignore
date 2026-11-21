@@ -1,5 +1,2 @@
-/script/
-/.github/
-/.vscode/
-/.gitignore
-/LICENSE
+**
+!Dockerfile
